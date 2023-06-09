@@ -15,6 +15,8 @@ import neural_net.Node;
 import units.Type;
 
 class NetwokTests {
+	
+	final double TEST_MARGIN = 0.00001;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -132,8 +134,6 @@ class NetwokTests {
 			Double weightsValue = 0.5;
 			int nbOut = 2;
 			
-			double testMargin = 0.00001;
-			
 			// create network
 			
 			Network net = new Network(Type.SIGMOID, nbOut);
@@ -154,7 +154,7 @@ class NetwokTests {
 			
 			assertAll(()->{
 				for(int i=0; i<out.length; i++)
-					assertTrue(Math.abs(out[i]-testOut[i]) < testMargin);
+					assertTrue(Math.abs(out[i]-testOut[i]) < TEST_MARGIN);
 			});
 			
 		} catch (Exception e) {
@@ -170,8 +170,6 @@ class NetwokTests {
 			Double[] testInputs = {0.1, -0.4, 0.7, 0.1};
 			Double weightsValue = 0.5;
 			int nbOut = 3;
-			
-			double testMargin = 0.00001;
 			
 			// create the network
 			
@@ -213,8 +211,7 @@ class NetwokTests {
 			
 			assertAll(()->{
 				for(int i=0; i<out.length; i++) {
-					System.out.println(out[i]-testOut[i]);
-					assertTrue(Math.abs(out[i]-testOut[i]) < testMargin);
+					assertTrue(Math.abs(out[i]-testOut[i]) < TEST_MARGIN);
 				}
 			});
 			
