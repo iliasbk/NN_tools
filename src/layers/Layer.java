@@ -1,9 +1,10 @@
 package layers;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import neural_net.Node;
-import units.Unit;
 
 /**
  * This class implements a layer of a network.<br>
@@ -12,7 +13,7 @@ import units.Unit;
  * <b>There must be at least one node in the layer, for a network to be built.<b>
  * @author ilias
  */
-public class Layer implements Node {
+public class Layer implements Node, Serializable {
 
 	protected ArrayList<Node> nodes = new ArrayList<Node>();
 
@@ -34,27 +35,67 @@ public class Layer implements Node {
 	 */
 	protected int stride = 0;
 	
-	public void addNode(Node n) {
+	public Layer() {}
+	
+	public Layer(Layer layer) {
+		cloneProperties(layer);
+	}
+	
+	protected void cloneProperties(Layer layer) {
+		for(Node node : layer.nodes)
+			this.nodes.add(node.clone());
+		
+		this.connectionSize = layer.connectionSize;
+		this.stride = layer.stride;
+		
+		if(layer.inputs != null)
+			this.inputs = layer.inputs.clone();
+	}
+	
+	public void addNode(Node n) throws Exception {
+		checkInputs();
 		nodes.add(n);
 	}
 	
 	public void setConnectionSize(int size) throws Exception {
-		if(inputs == null)
-			throw new Exception("Cannot set the connection size after the initialization of connections.");
-		
+		checkInputs();
 		this.connectionSize = size;
 	}
 	
-	public void setStride(int stride) {
+	public void setStride(int stride) throws Exception {
+		checkInputs();
 		this.stride = stride;
+	}
+	
+	private void checkInputs() throws Exception {
+		if(inputs != null)
+			throw new Exception("Cannot modify the layer after the initialization of connections.");
+	}
+	
+	public Double[] getInputsBlock(int nodeIndex) {
+		if(nodeIndex < 0 || nodeIndex >= nodes.size())
+			return null;
+		if(connectionSize==0)
+			return inputs;
+		int begin = nodeIndex*stride;
+		int end = begin+connectionSize;
+		return Arrays.copyOfRange(inputs, begin, end);
+	}
+	
+	public void setInputs(Double[] inputs) throws Exception {
+		initConnections(inputs.length);
+		this.inputs = inputs;
+	}
+	
+	public Node[] getNodes() {
+		return nodes.toArray(new Node[nodes.size()]);
 	}
 	
 //	---NODE INTERFACE---
 
 	@Override
-	public Node clone() {
-		// TODO Auto-generated method stub
-		return null;
+	public Layer clone() {
+		return new Layer(this);
 	}
 
 	@Override
@@ -85,9 +126,29 @@ public class Layer implements Node {
 	}
 
 	@Override
-	public void compute(Double[] inputs) {
-		// TODO Auto-generated method stub
-		
+	public Double[] compute(Double[] inputs) {
+		this.inputs = inputs;
+		Double[] outputs = new Double[this.getOutputsNumber()];
+		int outputCount = 0;
+		for(int i=0; i<nodes.size(); i++) {
+			Double[] res = nodes.get(i).compute(getInputsBlock(i));
+			for(Double r : res)
+				outputs[outputCount++] = r; 
+		}
+		return outputs;
+	}
+	
+
+	@Override
+	public void updateWeightsRandom(double probability) {
+		for(Node node : nodes)
+			node.updateWeightsRandom(probability);
+	}
+
+	@Override
+	public void setAllWeights(double value) {
+		for(Node node : nodes)
+			node.setAllWeights(value);
 	}
 }
 

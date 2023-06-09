@@ -1,13 +1,19 @@
 package layers;
 
+import java.io.Serializable;
+
 import neural_net.Node;
 import units.Unit;
 import units.UnitLinear;
 
-public class LayerLinear extends Layer {
+public class LayerLinear extends Layer implements Serializable {
 
 	public LayerLinear() {
 		nodes.add(new UnitLinear());
+	}
+	
+	public LayerLinear(LayerLinear layer) {
+		cloneProperties(layer);
 	}
 	
 	public LayerLinear(int nbNodes) throws Exception {
@@ -17,8 +23,17 @@ public class LayerLinear extends Layer {
 			nodes.add(new UnitLinear());
 	}
 	
-	public void addNode(Node n) {
+	public void addNode(Node n) throws Exception {
 		UnitLinear u = (UnitLinear) n;
-		nodes.add(u);
+		super.addNode(u);
+	}
+	
+	@Override
+	public LayerLinear clone() {
+		return new LayerLinear(this);
 	}
 }
+
+
+
+

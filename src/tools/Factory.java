@@ -29,8 +29,9 @@ public class Factory {
 	 */
 	public static Layer createLayer(Type layerType) {
 		switch(layerType) {
+		case LINEAR: return new LayerLinear();
 		case SIGMOID: return new LayerSigmoid();
-		default: return new LayerLinear();
+		default: return new Layer();
 		}
 	}
 
