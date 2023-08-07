@@ -6,18 +6,26 @@ import neural_net.Node;
 
 /**
  * This class implements a perceptron.<br>
- * It has 
+ * It contains weights for each input and an additional weight for the y-intercept, which is always multiplied by 1.
  * @author ilias
  */
 public abstract class Unit implements Node, Serializable {
 	
+	// UNIT'S ESSENTIALS
 	protected Double[] weights;
-	
 	protected Double output;
+	
+	// BACKPTOPAGATE OPTIMIZATION
+	protected Double[] inputs; //inputs to compute error gradient for each weight
+	protected Double sum; //input to the activation function, to compute its derivative with respect to this input
 	
 	private final int OUTPUT_AMOUNT = 1;
 	
-	private final double LEARNING_RATE = 0.05;
+	private final double LEARNING_RATE = 0.5;
+
+	protected abstract double activate(double value);
+	
+	protected abstract double activationFunctionDerivative(double value);
 	
 	protected void cloneProperties(Unit unit) {
 		if(unit.weights != null)
@@ -25,11 +33,16 @@ public abstract class Unit implements Node, Serializable {
 		if(unit.output != null)
 			output = unit.output;
 	}
-
-	protected abstract double activate(double value);
 	
 	public Double[] getWeights() {
 		return weights;
+	}
+	
+	public Double sum(Double[] inputs) {
+		sum = weights[0];
+		for(int i=0;i<inputs.length;i++)
+			sum += inputs[i]*weights[i+1];
+		return sum;
 	}
 	
 //	---NODE INTERFACE---
@@ -38,23 +51,23 @@ public abstract class Unit implements Node, Serializable {
 	public abstract Node clone();
 	
 	@Override
-	public void initConnections(int nbInputs) {
+	public void initConnections(int nbInputs) throws Exception {
+		if(nbInputs <= 0)
+			throw new Exception("Number of inputs should be greater than zero");
+		
 		weights = new Double[nbInputs+1];
 		for(int i=0;i<weights.length;i++)
 			weights[i] = Math.random() - 0.5; // initialize each weight to a value in the interval [-0.5, 0.5]
-	}
-
-	@Override
-	public Double[] compute(Double[] inputs) {
-		double val = weights[0];
-		for(int i=0;i<inputs.length;i++)
-			val += inputs[i]*weights[i+1];
-		return new Double[]{this.activate(val)};
 	}
 	
 	@Override
 	public int getOutputsNumber() {
 		return OUTPUT_AMOUNT;
+	}
+
+	@Override
+	public Double[] getOutputs() {
+		return new Double[] {output};
 	}
 
 	@Override
@@ -75,7 +88,45 @@ public abstract class Unit implements Node, Serializable {
 		for(int i=0; i<weights.length; i++)
 			weights[i] = value;
 	}
+
+	@Override
+	public Double[] compute(Double[] inputs) {
+		this.inputs = inputs;
+		this.output = activate(sum(inputs));
+		return new Double[]{output};
+	}
+
+	@Override
+	public Double[] backpropagate(Double[] receivedGradients) {
+		
+		Double receivedGradient = receivedGradients[0];
+		Double[] producedGradients = new Double[inputs.length];
+		
+		Double nodeGradient = receivedGradient * activationFunctionDerivative(sum);
+		
+		// compute inputs' gradients
+		for(int i=0; i<inputs.length; i++)
+			producedGradients[i] = nodeGradient * weights[i+1];
+		
+		double learningRate = Math.random() * LEARNING_RATE;
+		
+		// update weights
+		weights[0] += nodeGradient * learningRate; // first weight's input is always = 1
+		for(int i=1; i < weights.length; i++)
+			weights[i] += nodeGradient * inputs[i-1] * learningRate;
+		
+		
+		return producedGradients;
+	}
 }
+
+
+
+
+
+
+
+
 
 
 

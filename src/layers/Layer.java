@@ -53,17 +53,27 @@ public class Layer implements Node, Serializable {
 	}
 	
 	public void addNode(Node n) throws Exception {
+		addNode(n, 1);
+	}
+	
+	public void addNode(Node n, int nb) throws Exception {
 		checkInputs();
-		nodes.add(n);
+		for(int i=0; i<nb; i++)
+			nodes.add(n.clone());
 	}
 	
 	public void setConnectionSize(int size) throws Exception {
 		checkInputs();
-		this.connectionSize = size;
+		if(size <= 0)
+			connectionSize = stride = 0;
+		else
+			connectionSize = size;
 	}
 	
 	public void setStride(int stride) throws Exception {
 		checkInputs();
+		if(connectionSize == 0)
+			throw new Exception("The layer is fully connected. Set connection size first.");
 		this.stride = stride;
 	}
 	
@@ -82,11 +92,6 @@ public class Layer implements Node, Serializable {
 		return Arrays.copyOfRange(inputs, begin, end);
 	}
 	
-	public void setInputs(Double[] inputs) throws Exception {
-		initConnections(inputs.length);
-		this.inputs = inputs;
-	}
-	
 	public Node[] getNodes() {
 		return nodes.toArray(new Node[nodes.size()]);
 	}
@@ -100,6 +105,11 @@ public class Layer implements Node, Serializable {
 
 	@Override
 	public void initConnections(int nbInputs) throws Exception {
+		if(nodes.size() <= 0)
+			throw new Exception("The layer should contain at least one node");
+		if(nbInputs <= 0)
+			throw new Exception("Number of inputs should be greater than zero");
+		
 		int nbConnections = nbInputs;
 		
 		if(connectionSize > 0) {
@@ -118,26 +128,24 @@ public class Layer implements Node, Serializable {
 	}
 
 	@Override
+	public Double[] getOutputs() {
+		Double[] outputs = new Double[getOutputsNumber()];
+		int outputCount = 0;
+		for(int i=0; i<nodes.size(); i++) {
+			Double[] out = nodes.get(i).getOutputs();
+			for(Double o : out)
+				outputs[outputCount++] = o; 
+		}
+		return outputs;
+	}
+
+	@Override
 	public int getOutputsNumber() {
 		int total = 0;
 		for(Node n : nodes)
 			total += n.getOutputsNumber();
 		return total;
-	}
-
-	@Override
-	public Double[] compute(Double[] inputs) {
-		this.inputs = inputs;
-		Double[] outputs = new Double[this.getOutputsNumber()];
-		int outputCount = 0;
-		for(int i=0; i<nodes.size(); i++) {
-			Double[] res = nodes.get(i).compute(getInputsBlock(i));
-			for(Double r : res)
-				outputs[outputCount++] = r; 
-		}
-		return outputs;
-	}
-	
+	}	
 
 	@Override
 	public void updateWeightsRandom(double probability) {
@@ -149,6 +157,50 @@ public class Layer implements Node, Serializable {
 	public void setAllWeights(double value) {
 		for(Node node : nodes)
 			node.setAllWeights(value);
+	}
+	
+	@Override
+	public Double[] compute(Double[] inputs) {
+		this.inputs = inputs;
+		Double[] outputs = new Double[getOutputsNumber()];
+		int outputCount = 0;
+		for(int i=0; i<nodes.size(); i++) {
+			Double[] res = nodes.get(i).compute(getInputsBlock(i));
+			for(Double r : res)
+				outputs[outputCount++] = r; 
+		}
+		return outputs;
+	}
+
+	@Override
+	public Double[] backpropagate(Double[] receivedGradients) {
+		
+		Double[] producedGradients = new Double[inputs.length];
+		Arrays.fill(producedGradients, 0.0);
+		
+		int nbProducedGradientsPerNode = connectionSize > 0 ? connectionSize : inputs.length;
+		
+		int nodeGradientsStart = 0;
+		
+		for(int n=0; n<nodes.size();n++) {
+			
+			Node node = nodes.get(n);
+			
+			int nodeGradientsEnd = nodeGradientsStart + node.getOutputsNumber();
+			Double[] recievedNodeGradients = Arrays.copyOfRange(receivedGradients, nodeGradientsStart, nodeGradientsEnd);
+			
+			Double[] producedNodeGradients = node.backpropagate(recievedNodeGradients);
+			
+			int offset = stride * n;
+			
+			for(int i=0; i<nbProducedGradientsPerNode; i++) 
+				producedGradients[i+offset] += producedNodeGradients[i];
+			
+			nodeGradientsStart = nodeGradientsEnd;
+			
+		}
+		
+		return producedGradients;
 	}
 }
 

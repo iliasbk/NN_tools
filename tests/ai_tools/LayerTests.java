@@ -2,6 +2,7 @@ package ai_tools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +30,10 @@ class LayerTests {
 			Double[] inputs = {0.1, 0.2, 0.3, 0.4, 0.5};
 			Double[][] inputBlocks = {{0.1, 0.2}, {0.2, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
 			
-			layer.setInputs(inputs);
+			// set inpputs
+			Field layerInputs = Layer.class.getDeclaredField("inputs");
+			layerInputs.setAccessible(true);
+			layerInputs.set(layer, inputs);
 			
 			assertAll(() -> {
 				for(int i=0; i<nbNode; i++) {

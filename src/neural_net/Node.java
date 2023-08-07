@@ -12,15 +12,17 @@ public interface Node {
 	 * Initializes the number of connections of the node, 
 	 * and adapts the number of connections of its successor nodes.<br>
 	 * In layers initializes the inputs array. In units initializes the weights array.
-	 * @param nb the number of connections
-	 * @throws Exception if the number of inputs doesn't meet node's necessities
+	 * <br><b>This method must be called to complete the node initialization and enable its functionalities.</b>
+	 * @param nbInputs the number of connections
+	 * @throws Exception if the number of inputs doesn't meet node's necessities or if the node's parameters aren't completed
 	 */
 	public void initConnections(int nbInputs) throws Exception;
 	
 	/**
-	 * Compute outputs
+	 * Get the outputs values of the node
+	 * @return
 	 */
-	public Double[] compute(Double[] inputs);
+	public Double[] getOutputs();
 	
 	/**
 	 * Get the number of outputs of the node
@@ -41,7 +43,33 @@ public interface Node {
 	 */
 	public void setAllWeights(double value);
 	
+	/**
+	 * Compute outputs
+	 */
+	public Double[] compute(Double[] inputs);
+	
+	/**
+	 * Updates its weights accordingly to the received error,
+	 * and sends the calculated error to its inputs
+	 * @param error the received error
+	 */
+	public Double[] backpropagate(Double[] receivedGradients);
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

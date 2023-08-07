@@ -54,6 +54,13 @@ public class Network implements Node, Serializable {
 		out = net2.compute(new Double[] {0.2, -0.5, 0.7, 0.33, -0.9, -0.2, 0.7, 0.5});
 		for(Double o : out)
 			System.out.println(o);
+
+		System.out.println();
+		System.out.println();
+		
+		Double[] graidents = net2.backpropagate(new Double[] {0.1, -0.5, 0.9});
+		for(Double o : graidents)
+			System.out.println(o);
 	}
 		
 	
@@ -124,22 +131,25 @@ public class Network implements Node, Serializable {
 	
 	@Override
 	public void initConnections(int nbInputs) throws Exception {
+		if(layers.size() <= 0)
+			throw new Exception("The network should contain at least one layer");
+		if(nbInputs <= 0)
+			throw new Exception("Number of inputs should be greater than zero");
+		
 		for(Layer layer : layers) {
 			layer.initConnections(nbInputs);
 			nbInputs = layer.getOutputsNumber();
 		}	
 	}
-
+	
 	@Override
-	public Double[] compute(Double[] inputs) {
-		for(Layer layer : layers)
-			inputs = layer.compute(inputs);
-		return inputs;
+	public Double[] getOutputs() {
+		return getOutputLayer().getOutputs();
 	}
 
 	@Override
 	public int getOutputsNumber() {
-		return layers.get(layers.size()-1).getOutputsNumber();
+		return getOutputLayer().getOutputsNumber();
 	}
 
 	@Override
@@ -152,6 +162,21 @@ public class Network implements Node, Serializable {
 	public void setAllWeights(double value) {
 		for(Layer layer : layers)
 			layer.setAllWeights(value);
+	}
+
+	@Override
+	public Double[] compute(Double[] inputs) {
+		for(Layer layer : layers)
+			inputs = layer.compute(inputs);
+		return inputs;
+	}
+
+	@Override
+	public Double[] backpropagate(Double[] receivedGradients) {
+		// travel layers starting from the end
+		for(int l=layers.size(); --l>=0;)
+			receivedGradients = layers.get(l).backpropagate(receivedGradients);
+		return receivedGradients;
 	}
 
 }

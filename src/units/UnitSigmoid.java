@@ -6,7 +6,7 @@ public class UnitSigmoid extends Unit {
 
 	public UnitSigmoid() {}
 	
-	public UnitSigmoid(Unit unit) {
+	public UnitSigmoid(UnitSigmoid unit) {
 		cloneProperties(unit);
 	}
 
@@ -16,6 +16,14 @@ public class UnitSigmoid extends Unit {
 	protected double activate(double value) {
 		return 1/(1 + Math.exp(-value));
 	}
+	
+	@Override
+	protected double activationFunctionDerivative(double value) {
+		// f'(x) = exp(-x) / (1 + exp(-x))^2
+		double exp = Math.exp(-value);
+		double denom = Math.pow(1+exp, 2);
+		return exp / denom;
+	}
 
 //	---NODE INTERFACE---
 	
@@ -23,4 +31,5 @@ public class UnitSigmoid extends Unit {
 	public Node clone() {
 		return new UnitSigmoid(this);
 	}
+
 }

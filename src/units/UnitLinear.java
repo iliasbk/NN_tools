@@ -6,7 +6,12 @@ public class UnitLinear extends Unit {
 	
 	public static void main(String[] args) {
 		UnitLinear u1 = new UnitLinear();
-		u1.initConnections(2);
+		try {
+			u1.initConnections(2);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		UnitLinear u2 = u1.clone();
 		
 		Double[] w1 = u1.getWeights().clone();
@@ -29,7 +34,7 @@ public class UnitLinear extends Unit {
 	
 	public UnitLinear() {}
 	
-	public UnitLinear(Unit unit) {
+	public UnitLinear(UnitLinear unit) {
 		cloneProperties(unit);
 	}
 
@@ -37,14 +42,20 @@ public class UnitLinear extends Unit {
 	
 	@Override
 	protected double activate(double value) {
-		return value;
+		return value; // f(x) = x
 	}
 
+	@Override
+	protected double activationFunctionDerivative(double value) {
+		return 1; // f'(x) = (x)' = 1
+	}
+	
 //	---NODE INTERFACE---
 	
 	@Override
 	public UnitLinear clone() {
 		return new UnitLinear(this);
 	}
+
 	
 }

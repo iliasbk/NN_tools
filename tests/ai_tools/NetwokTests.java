@@ -16,7 +16,10 @@ import units.Type;
 
 class NetwokTests {
 	
-	final double TEST_MARGIN = 0.00001;
+	/**
+	 * Considering that the numbers are rounded to 4 digits after the decimal point
+	 */
+	final double TEST_MARGIN = 0.0001;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -183,7 +186,7 @@ class NetwokTests {
 			
 			Layer layer2 = new LayerSigmoid(3);
 			
-			// create the subnetwork
+			// create the subnetwork of the previous test
 			
 			Network subNet = new Network(Type.SIGMOID, 2);
 			
@@ -210,8 +213,82 @@ class NetwokTests {
 			Double[] testOut = {1.87814, 1.87814, 1.87814};
 			
 			assertAll(()->{
-				for(int i=0; i<out.length; i++) {
+				for(int i=0; i<out.length; i++) 
 					assertTrue(Math.abs(out[i]-testOut[i]) < TEST_MARGIN);
+			});
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	@Test
+	@DisplayName("Should compute the right outputs of a network composed of units")
+	void computeOutputsTest3() {
+		try {
+			Double[] inputs = {0.4, -0.3, 0.5};
+			Double[] testOut = {0.9238, 0.9238};
+			
+			Network net = new Network(Type.LINEAR, 2);
+			net.addLayer(new LayerSigmoid(3));
+			Layer outputLayer = net.getOutputLayer();
+			outputLayer.setConnectionSize(2);
+			outputLayer.setStride(1);
+			
+			net.initConnections(3);
+			net.setAllWeights(0.4);
+			
+			Double[] out = net.compute(inputs);
+			
+			assertAll(()->{
+				for(int i=0; i<out.length; i++)
+					assertTrue(Math.abs(out[i]-testOut[i]) < TEST_MARGIN);
+			});
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	@DisplayName("Should compute the right outputs of a network composed of units and subnets")
+	void computeOutputsTest4() {	
+		try {
+
+			Double[] inputs = {0.4, -0.3, 0.5};
+			Double[] testOut = {0.7575, 0.7575, 0.7575};
+			
+			Network net = new Network(Type.SIGMOID, 3);
+			
+			// add subnets of the previous test
+			Network subnet = new Network(Type.LINEAR, 2);
+			subnet.addLayer(new LayerSigmoid(3));
+			Layer outputLayer = subnet.getOutputLayer();
+			outputLayer.setConnectionSize(2);
+			outputLayer.setStride(1);
+			
+			Layer subnetLayer = new Layer();
+			subnetLayer.addNode(subnet);
+			subnetLayer.addNode(subnet);
+			
+			net.addLayer(subnetLayer);
+			
+			// set connection size of the output layer
+			outputLayer = net.getOutputLayer();
+			outputLayer.setConnectionSize(2);
+			outputLayer.setStride(1);
+			
+			// init connections
+			net.initConnections(3);
+			net.setAllWeights(0.4);
+			
+			Double[] out = net.compute(inputs);
+			
+			assertAll(()->{
+				for(int i=0; i<out.length; i++) {
+					System.out.println(out[i]);
+					assertTrue(Math.abs(out[i]-testOut[i]) <= TEST_MARGIN);
 				}
 			});
 			
@@ -220,6 +297,7 @@ class NetwokTests {
 		}
 		
 	}
+	
 	
 //	---NODE INTERFACE---
 	
