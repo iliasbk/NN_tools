@@ -21,7 +21,6 @@ public class LearningModule {
 	 * Computes and propagates the squared difference derivative with respect to each output
 	 * <br>Squared difference derivative = -2(y - f)
 	 * <br>We multiply by -1 the derivative, as we are looking to MINIMIZE the loss function.
-	 * <br>where y is the expected value and f is the computed one
 	 * @param expectedValues all the expected values of the outputs, given a set of exemplary inputs
 	 * @throws Exception if the number of outputs values and expected values doesn't match
 	 */

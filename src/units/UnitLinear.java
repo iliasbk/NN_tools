@@ -46,7 +46,7 @@ public class UnitLinear extends Unit {
 	}
 
 	@Override
-	protected double activationFunctionDerivative(double value) {
+	protected double activationFunctionDerivative() {
 		return 1; // f'(x) = (x)' = 1
 	}
 	

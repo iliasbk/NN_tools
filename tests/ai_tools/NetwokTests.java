@@ -20,14 +20,6 @@ class NetwokTests {
 	 * Considering that the numbers are rounded to 4 digits after the decimal point
 	 */
 	final double TEST_MARGIN = 0.0001;
-
-	@BeforeEach
-	void setUp() throws Exception {
-	}
-
-	@AfterEach
-	void tearDown() throws Exception {
-	}
 	
 	@Test
 	@DisplayName("Should initialize a network with only an output layer of the type any")

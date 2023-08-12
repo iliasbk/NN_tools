@@ -30,14 +30,9 @@ class LayerTests {
 			Double[] inputs = {0.1, 0.2, 0.3, 0.4, 0.5};
 			Double[][] inputBlocks = {{0.1, 0.2}, {0.2, 0.3}, {0.3, 0.4}, {0.4, 0.5}};
 			
-			// set inpputs
-			Field layerInputs = Layer.class.getDeclaredField("inputs");
-			layerInputs.setAccessible(true);
-			layerInputs.set(layer, inputs);
-			
 			assertAll(() -> {
 				for(int i=0; i<nbNode; i++) {
-					Double[] in = layer.getInputsBlock(i);
+					Double[] in = layer.getInputsBlock(inputs, i);
 					Double[] inTest = inputBlocks[i];
 					assertEquals(in.length, inTest.length);
 					for(int v=0; v<in.length;v++)

@@ -16,8 +16,8 @@ import neural_net.Node;
 public class Layer implements Node, Serializable {
 
 	protected ArrayList<Node> nodes = new ArrayList<Node>();
-
-	protected Double[] inputs;
+	
+	protected int nbInputs = 0;
 	
 	/**
 	 * Number of connections of each node in the layer with the inputs of the previous layer. <br>
@@ -47,9 +47,6 @@ public class Layer implements Node, Serializable {
 		
 		this.connectionSize = layer.connectionSize;
 		this.stride = layer.stride;
-		
-		if(layer.inputs != null)
-			this.inputs = layer.inputs.clone();
 	}
 	
 	public void addNode(Node n) throws Exception {
@@ -78,11 +75,11 @@ public class Layer implements Node, Serializable {
 	}
 	
 	private void checkInputs() throws Exception {
-		if(inputs != null)
+		if(nbInputs > 0)
 			throw new Exception("Cannot modify the layer after the initialization of connections.");
 	}
 	
-	public Double[] getInputsBlock(int nodeIndex) {
+	public Double[] getInputsBlock(Double[] inputs, int nodeIndex) {
 		if(nodeIndex < 0 || nodeIndex >= nodes.size())
 			return null;
 		if(connectionSize==0)
@@ -121,7 +118,7 @@ public class Layer implements Node, Serializable {
 			nbConnections = connectionSize;
 		}
 		
-		inputs = new Double[nbInputs];
+		this.nbInputs = nbInputs;
 		
 		for(Node n : nodes)
 			n.initConnections(nbConnections);
@@ -161,11 +158,10 @@ public class Layer implements Node, Serializable {
 	
 	@Override
 	public Double[] compute(Double[] inputs) {
-		this.inputs = inputs;
 		Double[] outputs = new Double[getOutputsNumber()];
 		int outputCount = 0;
 		for(int i=0; i<nodes.size(); i++) {
-			Double[] res = nodes.get(i).compute(getInputsBlock(i));
+			Double[] res = nodes.get(i).compute(getInputsBlock(inputs, i));
 			for(Double r : res)
 				outputs[outputCount++] = r; 
 		}
@@ -175,10 +171,10 @@ public class Layer implements Node, Serializable {
 	@Override
 	public Double[] backpropagate(Double[] receivedGradients) {
 		
-		Double[] producedGradients = new Double[inputs.length];
+		Double[] producedGradients = new Double[nbInputs];
 		Arrays.fill(producedGradients, 0.0);
 		
-		int nbProducedGradientsPerNode = connectionSize > 0 ? connectionSize : inputs.length;
+		int nbProducedGradientsPerNode = connectionSize > 0 ? connectionSize : nbInputs;
 		
 		int nodeGradientsStart = 0;
 		

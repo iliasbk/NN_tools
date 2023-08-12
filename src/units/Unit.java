@@ -17,15 +17,16 @@ public abstract class Unit implements Node, Serializable {
 	
 	// BACKPTOPAGATE OPTIMIZATION
 	protected Double[] inputs; //inputs to compute error gradient for each weight
-	protected Double sum; //input to the activation function, to compute its derivative with respect to this input
 	
 	private final int OUTPUT_AMOUNT = 1;
 	
 	private final double LEARNING_RATE = 0.5;
+	
+	double learningRate = LEARNING_RATE;
 
 	protected abstract double activate(double value);
 	
-	protected abstract double activationFunctionDerivative(double value);
+	protected abstract double activationFunctionDerivative();
 	
 	protected void cloneProperties(Unit unit) {
 		if(unit.weights != null)
@@ -38,8 +39,8 @@ public abstract class Unit implements Node, Serializable {
 		return weights;
 	}
 	
-	public Double sum(Double[] inputs) {
-		sum = weights[0];
+	public Double weightedSum(Double[] inputs) {
+		Double sum = weights[0];
 		for(int i=0;i<inputs.length;i++)
 			sum += inputs[i]*weights[i+1];
 		return sum;
@@ -92,7 +93,7 @@ public abstract class Unit implements Node, Serializable {
 	@Override
 	public Double[] compute(Double[] inputs) {
 		this.inputs = inputs;
-		this.output = activate(sum(inputs));
+		this.output = activate(weightedSum(inputs));
 		return new Double[]{output};
 	}
 
@@ -102,13 +103,13 @@ public abstract class Unit implements Node, Serializable {
 		Double receivedGradient = receivedGradients[0];
 		Double[] producedGradients = new Double[inputs.length];
 		
-		Double nodeGradient = receivedGradient * activationFunctionDerivative(sum);
+		Double nodeGradient = receivedGradient * activationFunctionDerivative();
 		
 		// compute inputs' gradients
 		for(int i=0; i<inputs.length; i++)
 			producedGradients[i] = nodeGradient * weights[i+1];
 		
-		double learningRate = Math.random() * LEARNING_RATE;
+//		learningRate *= 0.99995;
 		
 		// update weights
 		weights[0] += nodeGradient * learningRate; // first weight's input is always = 1

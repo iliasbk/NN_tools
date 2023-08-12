@@ -13,16 +13,16 @@ public class UnitSigmoid extends Unit {
 //	---UNIT INTERFACE---
 	
 	@Override
-	protected double activate(double value) {
-		return 1/(1 + Math.exp(-value));
+	protected double activate(double x) {
+		return 1/(1 + Math.exp(-x));
 	}
 	
 	@Override
-	protected double activationFunctionDerivative(double value) {
-		// f'(x) = exp(-x) / (1 + exp(-x))^2
-		double exp = Math.exp(-value);
-		double denom = Math.pow(1+exp, 2);
-		return exp / denom;
+	protected double activationFunctionDerivative() {
+		// f'(x) = exp(-x) / (1 + exp(-x))^2 
+		// f'(x) = f(x)*( 1 - f(x) )
+		// where f(x) = output
+		return output * ( 1 - output );
 	}
 
 //	---NODE INTERFACE---
