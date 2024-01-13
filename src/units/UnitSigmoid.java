@@ -1,7 +1,11 @@
 package units;
 
-import neural_net.Node;
+import nn_interface.Node;
 
+/**
+ * This class implements a perceptron with a sigmoid activation function<br>
+ * @author Ilias Bakhbukh
+ */
 public class UnitSigmoid extends Unit {
 
 	public UnitSigmoid() {}
@@ -20,7 +24,7 @@ public class UnitSigmoid extends Unit {
 	@Override
 	protected double activationFunctionDerivative() {
 		// f'(x) = exp(-x) / (1 + exp(-x))^2 
-		// f'(x) = f(x)*( 1 - f(x) )
+		//       = f(x) * ( 1 - f(x) )
 		// where f(x) = output
 		return output * ( 1 - output );
 	}

@@ -2,27 +2,23 @@ package units;
 
 import java.io.Serializable;
 
-import neural_net.Node;
+import nn_interface.Node;
 
 /**
  * This class implements a perceptron.<br>
- * It contains weights for each input and an additional weight for the y-intercept, which is always multiplied by 1.
- * @author ilias
+ * @author Ilias Bakhbukh
  */
 public abstract class Unit implements Node, Serializable {
-	
-	// UNIT'S ESSENTIALS
+
+	protected Double[] inputs; //inputs to compute error gradient for each weight
 	protected Double[] weights;
 	protected Double output;
 	
-	// BACKPTOPAGATE OPTIMIZATION
-	protected Double[] inputs; //inputs to compute error gradient for each weight
-	
 	private final int OUTPUT_AMOUNT = 1;
 	
-	private final double LEARNING_RATE = 0.5;
+	private final double DEFAULT_LEARNING_RATE = 0.01;
 	
-	double learningRate = LEARNING_RATE;
+	double learningRate = DEFAULT_LEARNING_RATE;
 
 	protected abstract double activate(double value);
 	
@@ -89,6 +85,11 @@ public abstract class Unit implements Node, Serializable {
 		for(int i=0; i<weights.length; i++)
 			weights[i] = value;
 	}
+	
+	@Override
+	public void setLearningRate(double learningRate) {
+		this.learningRate = learningRate;
+	}
 
 	@Override
 	public Double[] compute(Double[] inputs) {
@@ -108,8 +109,6 @@ public abstract class Unit implements Node, Serializable {
 		// compute inputs' gradients
 		for(int i=0; i<inputs.length; i++)
 			producedGradients[i] = nodeGradient * weights[i+1];
-		
-//		learningRate *= 0.99995;
 		
 		// update weights
 		weights[0] += nodeGradient * learningRate; // first weight's input is always = 1

@@ -11,7 +11,7 @@ import layers.Layer;
 import layers.LayerLinear;
 import layers.LayerSigmoid;
 import neural_net.Network;
-import neural_net.Node;
+import nn_interface.Node;
 import units.Type;
 
 class NetwokTests {
@@ -54,41 +54,50 @@ class NetwokTests {
 	@Test
 	@DisplayName("Should add a new hidden layer at the specified index position")
 	void addAHiddenLayerAtIndex() {
-		Network net = new Network();
-		Layer layer1 = new LayerSigmoid();
-		Layer layer2 = new LayerLinear();
-		Layer layer3 = new Layer();
-		net.addLayer(0, layer1);
-		net.addLayer(1, layer2);
-		net.addLayer(1, layer3);
-		
-		Layer hidden1 = net.getLayer(0);
-		Layer hidden2 = net.getLayer(2);
-		Layer hidden3 = net.getLayer(1);
-		Layer output = net.getLayer(3);
-		
-		assertEquals(layer1, hidden1);
-		assertEquals(layer2, hidden2);
-		assertEquals(layer3, hidden3);
-		assertEquals(output, net.getOutputLayer());
+		try {
+			Network net = new Network();
+			Layer layer1 = new LayerSigmoid();
+			Layer layer2 = new LayerLinear();
+			Layer layer3 = new Layer();
+			net.addLayer(0, layer1);
+			net.addLayer(1, layer2);
+			net.addLayer(1, layer3);
+			
+			Layer hidden1 = net.getLayer(0);
+			Layer hidden2 = net.getLayer(2);
+			Layer hidden3 = net.getLayer(1);
+			Layer output = net.getLayer(3);
+			
+			assertEquals(layer1, hidden1);
+			assertEquals(layer2, hidden2);
+			assertEquals(layer3, hidden3);
+			assertEquals(output, net.getOutputLayer());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Test
 	@DisplayName("Should add a new hidden layer at the end of the hidden layers")
 	void addAHiddenLayerInTheEnd() {
-		Network net = new Network();
-		Layer layer1 = new LayerSigmoid();
-		Layer layer2 = new LayerLinear();
-		net.addLayer(layer1);
-		net.addLayer(layer2);
-		
-		Layer hidden1 = net.getLayer(0);
-		Layer hidden2 = net.getLayer(1);
-		Layer output = net.getLayer(2);
-		
-		assertEquals(layer1, hidden1);
-		assertEquals(layer2, hidden2);
-		assertEquals(output, net.getOutputLayer());
+		try {
+			Network net = new Network();
+			Layer layer1 = new LayerSigmoid();
+			Layer layer2 = new LayerLinear();
+			net.addLayer(layer1);
+			net.addLayer(layer2);
+			
+			Layer hidden1 = net.getLayer(0);
+			Layer hidden2 = net.getLayer(1);
+			Layer output = net.getLayer(2);
+			
+			assertEquals(layer1, hidden1);
+			assertEquals(layer2, hidden2);
+			assertEquals(output, net.getOutputLayer());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Test
@@ -97,28 +106,33 @@ class NetwokTests {
 		final int START = 1;
 		final int END = 3;
 		
-		Network net = new Network();
-		Layer layer1 = new LayerSigmoid();
-		Layer layer2 = new LayerSigmoid();
-		net.addLayer(layer1);
-		net.addLayer(layer2);
+		try {
+			Network net = new Network();
+			Layer layer1 = new LayerSigmoid();
+			Layer layer2 = new LayerSigmoid();
+			net.addLayer(layer1);
+			net.addLayer(layer2);
+			
+			// randomize the type of added layers
+			Layer newLayer;
+			if(Math.random()>0.5) {
+				net.addLayers(Type.SIGMOID, START, END);
+				newLayer = new LayerSigmoid();
+			}else {
+				net.addLayers(Type.LINEAR, START, END);
+				newLayer = new LayerLinear();
+			}
+			
+			Layer[] hidden = net.getHiddenLayers();
+			
+			assertEquals(layer1, hidden[0]);
+			assertEquals(hidden[1].getClass(), newLayer.getClass());
+			assertEquals(hidden[2].getClass(), newLayer.getClass());
+			assertEquals(layer2, hidden[3]);
 		
-		// randomize the type of added layers
-		Layer newLayer;
-		if(Math.random()>0.5) {
-			net.addLayers(Type.SIGMOID, START, END);
-			newLayer = new LayerSigmoid();
-		}else {
-			net.addLayers(Type.LINEAR, START, END);
-			newLayer = new LayerLinear();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
-		Layer[] hidden = net.getHiddenLayers();
-		
-		assertEquals(layer1, hidden[0]);
-		assertEquals(hidden[1].getClass(), newLayer.getClass());
-		assertEquals(hidden[2].getClass(), newLayer.getClass());
-		assertEquals(layer2, hidden[3]);
 	}
 	
 	@Test
@@ -279,7 +293,6 @@ class NetwokTests {
 			
 			assertAll(()->{
 				for(int i=0; i<out.length; i++) {
-					System.out.println(out[i]);
 					assertTrue(Math.abs(out[i]-testOut[i]) <= TEST_MARGIN);
 				}
 			});

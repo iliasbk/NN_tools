@@ -63,11 +63,6 @@ class LearningModuleTests {
 			module.propagateSquaredDifference(expectedOutputs);
 			
 			
-			
-			assertAll(()->{
-				
-			});
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

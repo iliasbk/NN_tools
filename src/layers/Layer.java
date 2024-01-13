@@ -4,25 +4,30 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import neural_net.Node;
+import nn_interface.Node;
 
 /**
  * This class implements a layer of a network.<br>
- * It contains some nodes, which can be units or other networks.<br>
- * The minimum possible layer is composed of one node.<br>
- * <b>There must be at least one node in the layer, for a network to be built.<b>
- * @author ilias
+ * It can contain arbitrarily many nodes, which can be units, layers or other networks.<br>
+ * <b>It must contain at least one node in order to be initialized.</b><br>
+ * @author Ilias Bakhbukh
  */
 public class Layer implements Node, Serializable {
 
+	/**
+	 * This collection contains layer nodes
+	 */
 	protected ArrayList<Node> nodes = new ArrayList<Node>();
 	
+	/**
+	 * This variable represents the number of inputs in this layer
+	 */
 	protected int nbInputs = 0;
 	
 	/**
-	 * Number of connections of each node in the layer with the inputs of the previous layer. <br>
+	 * Number of connections of each node in the layer with the inputs. <br>
 	 * <b>ex</b> : connectionSize=3, then each node will connect to only 3 adjacent inputs starting from the first. <br>
-	 * connectionSize = 0 means that it will connect to <b>all</b> the inputs.
+	 * connectionSize = 0 means that the layer is fully connected.
 	 */
 	protected int connectionSize = 0;
 	
@@ -35,12 +40,23 @@ public class Layer implements Node, Serializable {
 	 */
 	protected int stride = 0;
 	
+	/**
+	 * The constructor of an empty layer
+	 */
 	public Layer() {}
 	
+	/**
+	 * Layer copy constructor
+	 * @param layer
+	 */
 	public Layer(Layer layer) {
 		cloneProperties(layer);
 	}
 	
+	/**
+	 * This method transforms the current layer into a copy of the specified layer
+	 * @param layer the layer to copy
+	 */
 	protected void cloneProperties(Layer layer) {
 		for(Node node : layer.nodes)
 			this.nodes.add(node.clone());
@@ -49,24 +65,50 @@ public class Layer implements Node, Serializable {
 		this.stride = layer.stride;
 	}
 	
-	public void addNode(Node n) throws Exception {
-		addNode(n, 1);
+	/**
+	 * This method adds the copy of <i>node</i> to the layer 
+	 * @param node - model node
+	 * @throws Exception if the layer is already set up, 
+	 * cannot modify the layer after the number of inputs is defined
+	 */
+	public void addNode(Node node) throws Exception {
+		addNode(node, 1);
 	}
 	
-	public void addNode(Node n, int nb) throws Exception {
+	/**
+	 * This method adds <i>n</i> copies of <i>node</i> to the layer
+	 * @param node - model node
+	 * @param n - number of new nodes to add
+	 * @throws Exception if the layer is already set up, 
+	 * cannot modify the layer after the number of inputs is defined
+	 */
+	public void addNode(Node node, int n) throws Exception {
 		checkInputs();
-		for(int i=0; i<nb; i++)
-			nodes.add(n.clone());
+		for(int i=0; i<n; i++)
+			nodes.add(node.clone());
 	}
 	
-	public void setConnectionSize(int size) throws Exception {
+	/**
+	 * This method sets the number of inputs to each node in the layer
+	 * @param n - number of inputs of each node, <i>0</i> means the layer is fully connected
+	 * @throws Exception if the layer is already set up, 
+	 * cannot modify the layer after the number of inputs is defined
+	 */
+	public void setConnectionSize(int n) throws Exception {
 		checkInputs();
-		if(size <= 0)
+		if(n <= 0)
 			connectionSize = stride = 0;
 		else
-			connectionSize = size;
+			connectionSize = n;
 	}
 	
+	/**
+	 * This method sets the stride between the first input of each node
+	 * @param stride
+	 * @throws Exception if the layer is already set up, 
+	 * cannot modify the layer after the number of inputs is defined. 
+	 * Or, if the connection size = 0 (layer is fully connected), then the stride can't be defined
+	 */
 	public void setStride(int stride) throws Exception {
 		checkInputs();
 		if(connectionSize == 0)
@@ -74,11 +116,22 @@ public class Layer implements Node, Serializable {
 		this.stride = stride;
 	}
 	
+	/**
+	 * This method checks whether the number of inputs is defined, that is if the layer is fully set up
+	 * @throws Exception if the layer is already set up
+	 */
 	private void checkInputs() throws Exception {
 		if(nbInputs > 0)
 			throw new Exception("Cannot modify the layer after the initialization of connections.");
 	}
 	
+	/**
+	 * This method attributes inputs to the specified layer node 
+	 * according to layer inputs array and the index of the node
+	 * @param inputs - layer inputs array
+	 * @param nodeIndex - node's index in the layer
+	 * @return node inputs array
+	 */
 	public Double[] getInputsBlock(Double[] inputs, int nodeIndex) {
 		if(nodeIndex < 0 || nodeIndex >= nodes.size())
 			return null;
@@ -89,6 +142,10 @@ public class Layer implements Node, Serializable {
 		return Arrays.copyOfRange(inputs, begin, end);
 	}
 	
+	/**
+	 * Returns nodes as an array
+	 * @return layer nodes as an array
+	 */
 	public Node[] getNodes() {
 		return nodes.toArray(new Node[nodes.size()]);
 	}
@@ -154,6 +211,12 @@ public class Layer implements Node, Serializable {
 	public void setAllWeights(double value) {
 		for(Node node : nodes)
 			node.setAllWeights(value);
+	}
+	
+	@Override
+	public void setLearningRate(double learningRate) {
+		for(Node node : nodes)
+			node.setLearningRate(learningRate);
 	}
 	
 	@Override

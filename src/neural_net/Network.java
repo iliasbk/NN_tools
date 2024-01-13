@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import layers.*;
-import tools.Factory;
+import nn_interface.Node;
+import tools.NodeFactory;
 import units.Type;
-import units.Unit;
-import units.UnitLinear;
 import units.UnitSigmoid;
 
 /**
@@ -25,7 +24,7 @@ import units.UnitSigmoid;
  * <br>6. Finally call <i>initConnections</i> method to denote the end of the building process and to initialize the connections
  * <br><b>(The network cannot be modified after the call to <i>initConnections</i>)</b>
  * 
- * @author ilias
+ * @author Ilias Bakhbukh
  */
 public class Network implements Node, Serializable {
 	
@@ -84,10 +83,14 @@ public class Network implements Node, Serializable {
 	 * @throws Exception 
 	 */
 	public Network(Type outputType, int nbOutputs) throws Exception {
-		Layer newUnit = Factory.createLayer(outputType, nbOutputs);
+		Layer newUnit = NodeFactory.createLayer(outputType, nbOutputs);
 		layers.add(newUnit);
 	}
 	
+	/**
+	 * Class constructor that creates a copy of the specified network
+	 * @param network
+	 */
 	public Network(Network network) {
 		for(Layer layer : network.layers)
 			this.layers.add(layer.clone());
@@ -95,30 +98,75 @@ public class Network implements Node, Serializable {
 	
 //	---LAYERS MANAGEMENT---
 	
+	/**
+	 * Adds the specified layer at the end of the hidden layers
+	 * @param layer - layer to be inserted
+	 */
 	public void addLayer(Layer layer) {
 		addLayer(layers.size()-1, layer);
 	}
 	
+	/**
+	 * Adds the specified layer at the position <i>index</i>
+	 * @param index - index at which the specified layer is to be inserted
+	 * @param layer - layer to be inserted
+	 */
 	public void addLayer(int index, Layer layer) {
 		layers.add(index, layer);
 	}
 	
+	/**
+	 * Inserts layers of the specified type, starting from <i>startIndex</i> included up to <i>endIndex</i> excluded
+	 * @param layerType - type of the layers
+	 * @param startIndex - first index
+	 * @param endIndex - last index
+	 */
 	public void addLayers(Type layerType, int startIndex, int endIndex) {
 		for(; startIndex<endIndex; startIndex++)
-			layers.add(startIndex, Factory.createLayer(layerType));
+			layers.add(startIndex, NodeFactory.createLayer(layerType));
 	}
 	
+	/**
+	 * Returns the layer at the specified position
+	 * @param index - index of the layer to return
+	 * @return the layer at the specified position
+	 */
 	public Layer getLayer(int index) {
 		return layers.get(index);
 	}
 	
+	/**
+	 * Returns the output layer
+	 * @return the output layer
+	 */
 	public Layer getOutputLayer() {
 		return layers.get(layers.size()-1);
 	}
 	
+	/**
+	 * Returns the array of hidden layers, that is all the layers excluding the last, the output layer
+	 * @return hidden layers
+	 */
 	public Layer[] getHiddenLayers() {
 		Layer[] hidden = new Layer[layers.size()-1];
 		return layers.subList(0, layers.size()-1).toArray(hidden);
+	}
+	
+	/**
+	 * Replaces the output layer
+	 * @param layer the new output layer
+	 */
+	public void setOutputLayer(Layer layer) {
+		setLayer(layers.size()-1, layer);
+	}
+	
+	/**
+	 * Replaces the layer at the specified position with the specified layer
+	 * @param index position of the layer to replace
+	 * @param layer the new layer to be set at the specified position
+	 */
+	public void setLayer(int index, Layer layer) {
+		layers.set(index, layer);
 	}
 
 	
@@ -162,6 +210,12 @@ public class Network implements Node, Serializable {
 	public void setAllWeights(double value) {
 		for(Layer layer : layers)
 			layer.setAllWeights(value);
+	}
+
+	@Override
+	public void setLearningRate(double learningRate) {
+		for(Layer layer : layers)
+			layer.setLearningRate(learningRate);
 	}
 
 	@Override

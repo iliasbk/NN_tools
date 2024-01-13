@@ -1,7 +1,11 @@
 package units;
 
-import neural_net.Node;
+import nn_interface.Node;
 
+/**
+ * This class implements a perceptron with a linear activation function<br>
+ * @author Ilias Bakhbukh
+ */
 public class UnitLinear extends Unit {
 	
 	public static void main(String[] args) {
@@ -47,7 +51,7 @@ public class UnitLinear extends Unit {
 
 	@Override
 	protected double activationFunctionDerivative() {
-		return 1; // f'(x) = (x)' = 1
+		return 0.005; // f'(x) = (x)' = 1
 	}
 	
 //	---NODE INTERFACE---

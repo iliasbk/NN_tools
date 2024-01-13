@@ -8,7 +8,13 @@ import units.Unit;
 import units.UnitLinear;
 import units.UnitSigmoid;
 
-public class Factory {
+/**
+ * This class implements a factory for typed layers and units
+ * 
+ * @author Ilias Bakhbukh
+ *
+ */
+public class NodeFactory {
 	
 	/**
 	 * Creates a unit of a given type
@@ -28,11 +34,15 @@ public class Factory {
 	 * @return a layer of the specified type
 	 */
 	public static Layer createLayer(Type layerType) {
-		switch(layerType) {
-		case LINEAR: return new LayerLinear();
-		case SIGMOID: return new LayerSigmoid();
-		default: return new Layer();
+		try {
+			switch(layerType) {
+			case LINEAR: return new LayerLinear();
+			case SIGMOID: return new LayerSigmoid();
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
+		return new Layer();
 	}
 
 	/**
